@@ -1,0 +1,42 @@
+body {
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    font-size: 36px;
+}
+
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 10px;
+    max-width: 300px;
+    margin: 0 auto;
+    margin-top: 20px;
+}
+
+.cell {
+    width: 100px;
+    height: 100px;
+    background-color: #eee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+#winner {
+    font-size: 24px;
+    margin-top: 10px;
+}
+.X::before {
+    content: "X";
+    color: #ff0000; /* Color de la "X" */
+}
+
+.O::before {
+    content: "O";
+    color: #0000ff; /* Color de la "O" */
+}
