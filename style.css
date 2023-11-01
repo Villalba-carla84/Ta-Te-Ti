@@ -1,42 +1,106 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+
+#cont{
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+grid-gap: 10px;
+margin: 50px;
+background-color: rgba(255, 255, 255, 0.8); /* Fondo de pizarra con transparencia */
+border: 5px solid #000; /* Borde negro que simula la pizarra */
+border-radius: 10px;
+padding: 20px;
+}
+
+.btn {
+width: 100px;
+height: 100px;
+background-color: #fff; /* Celdas blancas */
+border: 3px solid #000; /* Borde negro que simula tiza */
+font-size: 2rem;
+text-align: center;
+line-height: 100px;
+cursor: pointer;
+}
+
 body {
-    text-align: center;
-    font-family: Arial, sans-serif;
+    background-image: url('./fondo5.jpg'); 
+    background-size: cover; 
+    display: grid;
+    place-items: center;
+    font-family: Bradley Hand ITC ; 
+    align-content: center;
+    height: 96vh;
 }
 
 h1 {
-    font-size: 36px;
+    margin:91px 0 50px 0;
+    font-size: 5rem;
+    color: rgb(54, 46, 46); /* Rojo brillante */
+    -webkit-text-stroke: .5px rgb(0, 0, 0); /* Borde negro ligero */
 }
 
-#game-board {
+input {
+    margin-bottom: 20px;
+    padding: 10px; /* Aumento del espaciado */
+    font-size: 1.4rem; /* Tamaño de fuente más grande */
+}
+
+button {
+    font-size: 1.4rem; /* Tamaño de fuente más grande */
+    margin-bottom: 10px;
+    background-color: rgb(255, 200, 0); /* Amarillo brillante */
+    border: 2px solid rgb(17 17 17); /* Borde rojo */
+    color: rgb(255, 0, 0); /* Texto en rojo */
+}
+
+img {
+    width: 50px; /* Imagen más grande */
+}
+
+/* #cont {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-gap: 10px;
-    max-width: 300px;
-    margin: 0 auto;
-    margin-top: 20px;
-}
+    grid-template-columns: 1fr 1fr 1fr;
+    background-color: rgb(0, 0, 0); 
+    border: 5px solid rgb(128, 128, 128); 
+    border-radius: 10px;
+    padding: 20px; 
+} */
 
-.cell {
-    width: 100px;
-    height: 100px;
-    background-color: #eee;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 24px;
+/* .btn {
+    font-size: 2.5rem;
+    width: 120px; 
+    height: 120px;
     cursor: pointer;
+    background-color: rgb(255, 102, 204); 
+    border: 5px solid rgb(128, 128, 128); 
+    border-radius: 50%; 
+} */
+
+#find {
+    font-size: 1.6rem; /* Tamaño de fuente más grande */
+    color: white;
+    cursor: pointer;
+    padding: 10px; /* Aumento del espaciado */
+    border-radius: 20px; /* Borde redondeado */
+    width: 300px; /* Ancho del botón más grande */
+    background-color: rgb(35, 79, 144); /* Azul brillante */
 }
 
-#winner {
-    font-size: 24px;
-    margin-top: 10px;
-}
-.X::before {
-    content: "X";
-    color: #ff0000; /* Color de la "X" */
+.btn:hover {
+
+      background-color: rgb(255, 153, 204);/* Rosa más claro al pasar el ratón  */
 }
 
-.O::before {
-    content: "O";
-    color: #0000ff; /* Color de la "O" */
+button.enabled {
+    opacity: 1;
+}
+
+p {
+    font-size: 2.2rem; /* Tamaño de fuente más grande */
+    font-weight: bold;
+    color: rgb(10 10 10); /* Verde brillante */
 }

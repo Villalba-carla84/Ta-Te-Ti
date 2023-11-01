@@ -1,80 +1,147 @@
-// Obtener todas las celdas del tablero
-const cells = document.querySelectorAll(".cell");
-const winnerMessage = document.getElementById("winner");
-let currentPlayer = 'X'; // Declaración de currentPlayer
-let gameActive = true; // Declaración de gameActive
+document.getElementById("loading").style.display = "none"
+document.getElementById("bigcont").style.display = "none"
+document.getElementById("userCont").style.display = "none"
+document.getElementById("oppNameCont").style.display = "none"
+document.getElementById("valueCont").style.display = "none"
+document.getElementById("whosTurn").style.display = "none"
+
+const socket = io();
+
+let name;
+
+document.getElementById('find').addEventListener("click", function () {
+    name = document.getElementById("name").value
+    document.getElementById("user").innerText = name
+    if (name == null || name == '') {
+        alert("Please enter a name")
+    }
+    else {
+
+        socket.emit("find", { name: name })
+
+        document.getElementById("loading").style.display = "block"
+        document.getElementById("find").disabled = true;
+
+    }
+})
 
 
-// Función que se ejecuta al hacer clic en una celda
-function handleCellClick(event) {
-    if (gameActive) {
-        const cell = event.target;
-        const cellIndex = Array.from(cell.parentElement.children).indexOf(cell);
 
-        if (!cell.classList.contains("X") && !cell.classList.contains("O")) {
-            cell.classList.add(currentPlayer);
+socket.on("find", (e) => {
 
-            // Enviar la celda seleccionada al servidor
-            ws.send(cellIndex.toString());
 
-            // Comprobar si se ganó el juego o si es un empate
-            checkGameResult();
+    let allPlayersArray = e.allPlayers
+    console.log("html",allPlayersArray)
 
-            // Cambiar el turno
-            currentPlayer = currentPlayer === "X" ? "O" : "X";
-            displayCurrentPlayer();// Actualizar el jugador actual en el tablero
-        }
+    if (name != '') {
+        document.getElementById("userCont").style.display = "block"
+        document.getElementById("oppNameCont").style.display = "block"
+        document.getElementById("valueCont").style.display = "block"
+        document.getElementById("loading").style.display = "none"
+        document.getElementById("name").style.display = "none"
+        document.getElementById("find").style.display = "none"
+        document.getElementById("enterName").style.display = "none"
+        document.getElementById("bigcont").style.display = "block"
+        document.getElementById("whosTurn").style.display = "block"
+        document.getElementById("whosTurn").innerText = "Es el turno de X"
+
+    }
+
+    let oppName
+    let value
+
+    const foundObject = allPlayersArray.find(obj => obj.p1.p1name == `${name}` || obj.p2.p2name == `${name}`);
+    foundObject.p1.p1name == `${name}` ? oppName = foundObject.p2.p2name : oppName = foundObject.p1.p1name
+    foundObject.p1.p1name == `${name}` ? value = foundObject.p1.p1value : value = foundObject.p2.p2value
+
+    document.getElementById("oppName").innerText = oppName
+    document.getElementById("value").innerText = value
+
+
+})
+
+document.querySelectorAll(".btn").forEach(e => {
+    e.addEventListener("click", function () {
+        let value = document.getElementById("value").innerText
+        e.innerText = value
+
+        socket.emit("playing", { value: value, id: e.id, name: name })
+
+    })
+})
+
+socket.on("playing", (e) => {
+    const foundObject = (e.allPlayers).find(obj => obj.p1.p1name == `${name}` || obj.p2.p2name == `${name}`);
+
+    p1id = foundObject.p1.p1move
+    p2id = foundObject.p2.p2move
+
+    if ((foundObject.sum) % 2 == 0) {
+        document.getElementById("whosTurn").innerText = "Es el turno de O"
+    }
+    else {
+        document.getElementById("whosTurn").innerText = "Es el turno de X"
+    }
+
+    if (p1id != '') {
+        document.getElementById(`${p1id}`).innerText = "X"
+        document.getElementById(`${p1id}`).disabled = true
+        document.getElementById(`${p1id}`).style.color = "black"
+    }
+    if (p2id != '') {
+        document.getElementById(`${p2id}`).innerText = "O"
+        document.getElementById(`${p2id}`).disabled = true
+        document.getElementById(`${p2id}`).style.color = "black"
+    }
+
+    check(name, foundObject.sum)
+
+
+})
+
+function check(name, sum) {
+
+
+    document.getElementById("btn1").innerText == '' ? b1 = "a" : b1 = document.getElementById("btn1").innerText
+    document.getElementById("btn2").innerText == '' ? b2 = "b" : b2 = document.getElementById("btn2").innerText
+    document.getElementById("btn3").innerText == '' ? b3 = "c" : b3 = document.getElementById("btn3").innerText
+    document.getElementById("btn4").innerText == '' ? b4 = "d" : b4 = document.getElementById("btn4").innerText
+    document.getElementById("btn5").innerText == '' ? b5 = "e" : b5 = document.getElementById("btn5").innerText
+    document.getElementById("btn6").innerText == '' ? b6 = "f" : b6 = document.getElementById("btn6").innerText
+    document.getElementById("btn7").innerText == '' ? b7 = "g" : b7 = document.getElementById("btn7").innerText
+    document.getElementById("btn8").innerText == '' ? b8 = "h" : b8 = document.getElementById("btn8").innerText
+    document.getElementById("btn9").innerText == '' ? b9 = "i" : b9 = document.getElementById("btn9").innerText
+
+
+    if ((b1 == b2 && b2 == b3) || (b4 == b5 && b5 == b6) || (b7 == b8 && b8 == b9) || (b1 == b4 && b4 == b7) || (b2 == b5 && b5 == b8) || (b3 == b6 && b6 == b9) || (b1 == b5 && b5 == b9) || (b3 == b5 && b5 == b7)) {
+
+        socket.emit("gameover", { name: name })
+
+        setTimeout(() => {
+
+            sum % 2 == 0 ? alert("GANÓ X!!") : alert("GANÓ O !!")
+
+            setTimeout(() => {
+                location.reload()
+
+            }, 2000)
+
+        }, 100)
+
+    }
+
+    else if (sum == 10) {
+        socket.emit("gameover", { name: name })
+
+        setTimeout(() => {
+
+            alert("EMPATE!!")
+
+            setTimeout(() => {
+                location.reload()
+
+            }, 2000)
+
+        }, 100)
     }
 }
-
-// Agregar un manejador de clic para cada celda
-cells.forEach(cell => cell.addEventListener("click", handleCellClick));
-
-// Configurar WebSockets
-const ws = new WebSocket("ws://192.168.0.113:3000");
-ws.addEventListener("open", () => {
-    console.log("WebSocket connection established");
-});
-
-// Escuchar mensajes del servidor
-ws.addEventListener("message", (event) => {
-    const message = event.data;
-
-    if (message === "X" || message === "O") {
-        currentPlayer = message;
-        winnerMessage.textContent = `Es el turno de ${currentPlayer}`;
-    } else {
-        winnerMessage.textContent = message;
-        gameActive = false;
-    }
-});
-function checkGameResult() {
-    const winningCombinations = [
-        [0, 1, 2], [3, 4, 5], [6, 7, 8], // Filas
-        [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columnas
-        [0, 4, 8], [2, 4, 6]              // Diagonales
-    ];
-
-    for (const combination of winningCombinations) {
-        const [a, b, c] = combination;
-        if (cells[a].classList.contains(currentPlayer) &&
-            cells[b].classList.contains(currentPlayer) &&
-            cells[c].classList.contains(currentPlayer)) {
-            winnerMessage.textContent = `${currentPlayer} ganó`;
-            gameActive = false;
-            return;
-        }
-    }
-
-    const isBoardFull = Array.from(cells).every(cell => cell.classList.contains("X") || cell.classList.contains("O"));
-    if (isBoardFull) {
-        winnerMessage.textContent = "Empate";
-        gameActive = false;
-    }
-}
-
-function displayCurrentPlayer() {
-    const currentPlayerDisplay = document.getElementById("currentPlayer");
-    currentPlayerDisplay.textContent = `Turno de ${currentPlayer}`;
-}
-

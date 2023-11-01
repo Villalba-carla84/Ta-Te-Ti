@@ -1,73 +1,90 @@
-const express = require("express");
-const http = require("http");
-const WebSocket = require("ws");
+const express=require("express")
+const app=express()
 
-const app = express();
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const path=require("path")
+const http=require("http")
+const {Server}=require("socket.io")
 
-app.use(express.static(__dirname));
 
-// Representa el tablero del juego
-const board = ["", "", "", "", "", "", "", "", ""];
-let currentPlayer = "X";
-let gameActive = true;
+const server=http.createServer(app)
 
-wss.on('connection', (ws) => {
-    ws.on("message", (message) => {
-        if (gameActive) {
-            const cellIndex = parseInt(message);
+const io=new Server(server)
+app.use(express.static(path.resolve("")))
 
-            if (board[cellIndex] === "") {
-                board[cellIndex] = currentPlayer;
-                ws.send(currentPlayer);
-                
-                if (checkWinner()) {
-                    wss.clients.forEach((client) => {
-                        client.send(`Player ${currentPlayer} wins!`);
-                    });
-                    gameActive = false;
-                } else if (isBoardFull()) {
-                    wss.clients.forEach((client) => {
-                        client.send("It's a draw!");
-                    });
-                    gameActive = false;
-                } else {
-                    currentPlayer = currentPlayer === "X" ? "O" : "X";
+let arr=[]
+let playingArray=[]
+
+io.on("connection",(socket)=>{
+
+    socket.on("find",(e)=>{
+
+        if(e.name!=null){
+
+            arr.push(e.name)
+
+            if(arr.length>=2){
+                let p1obj={
+                    p1name:arr[0],
+                    p1value:"X",
+                    p1move:""
                 }
+                let p2obj={
+                    p2name:arr[1],
+                    p2value:"O",
+                    p2move:""
+                }
+
+                let obj={
+                    p1:p1obj,
+                    p2:p2obj,
+                    sum:1
+                }
+                playingArray.push(obj)
+
+                arr.splice(0,2)
+
+                io.emit("find",{allPlayers:playingArray})
+
             }
+
         }
-    });
-});
 
-// Verificar si hay un ganador
-function checkWinner() {
-    const winPatterns = [
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
-        [0, 3, 6],
-        [1, 4, 7],
-        [2, 5, 8],
-        [0, 4, 8],
-        [2, 4, 6]
-    ];
+    })
 
-    for (const pattern of winPatterns) {
-        const [a, b, c] = pattern;
-        if (board[a] !== "" && board[a] === board[b] && board[a] === board[c]) {
-            return true;
+    socket.on("playing",(e)=>{
+        if(e.value=="X"){
+            let objToChange=playingArray.find(obj=>obj.p1.p1name===e.name)
+
+            objToChange.p1.p1move=e.id
+            objToChange.sum++
         }
-    }
+        else if(e.value=="O"){
+            let objToChange=playingArray.find(obj=>obj.p2.p2name===e.name)
 
-    return false;
-}
+            objToChange.p2.p2move=e.id
+            objToChange.sum++
+        }
 
-// Verificar si el tablero está lleno (empate)
-function isBoardFull() {
-    return board.every(cell => cell !== "");
-}
+        io.emit("playing",{allPlayers:playingArray})
 
-server.listen(3000, () => {
-    console.log("Server connected to port 3000");
-});
+    })
+
+    socket.on("gameOver",(e)=>{
+        playingArray=playingArray.filter(obj=>obj.p1.p1name!==e.name)
+        console.log(playingArray)
+        console.log("lol")
+    })
+
+
+})
+
+
+
+
+app.get("/",(req,res)=>{
+    return res.sendFile("index.html")
+})
+
+server.listen(3000,()=>{
+    console.log("port connected to 3000")
+})
